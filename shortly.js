@@ -72,6 +72,16 @@ function(req, res) {
   });
 });
 
+app.post('/signup',
+function(req, res) {
+  new User({
+    username: req.body.username,
+    password: req.body.password
+  }).save().then(function() {
+    res.setHeader('Location', '/');
+    res.sendStatus(200);
+  });
+});
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/

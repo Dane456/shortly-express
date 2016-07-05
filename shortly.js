@@ -2,6 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 
 
 var db = require('./app/config');
@@ -16,6 +17,8 @@ var app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 app.use(partials());
+app.use(session({secret: 'ssshhhhh'}));
+var sess;
 // Parse JSON (uniform resource locators)
 app.use(bodyParser.json());
 // Parse forms (signup/login)
@@ -35,10 +38,18 @@ function(req, res) {
 
 app.get('/links', 
 function(req, res) {
+  sess = req.session;
+  if (sess.username) {
+    console.log('got yo sess bitch');
+  } else {
+    console.log('no sees');
+  }
+
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
 });
+
 
 app.post('/links', 
 function(req, res) {
@@ -92,8 +103,8 @@ function(req, res) {
 
 app.post('/login',
 function(req, res) {
-
   var found = false;
+  console.log('Users: ', User.models);
   Users.models.forEach(function(item) {
     if (req.body.username === item.get('username')) { found = true; }
   });
@@ -101,9 +112,15 @@ function(req, res) {
   if (found) {
     res.setHeader('Location', '/');
     res.sendStatus(200);
+    sess = req.session;
+    sess.username = req.body.username;
+    sess.password = req.body.password;
   } else {
+    console.log(req.body.username);
+    console.log(req.body.password);
     res.setHeader('Location', '/login');
     res.sendStatus(200);
+    res.end();
   }
 
 });

@@ -9,7 +9,6 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "postinstall": "curl -s https://raw.githubusercontent.com/hackreactor-labs/pomander/master/bin/install | bash",
     "start": "nodemon --ignore node_modules shortly.js",
     "start:es6": "nodemon --exec node-babel --ignore node_modules shortly.js",
     "test": "node shortly.js & mocha --bail --reporter nyan test/ServerSpec.js; pkill -n node;",

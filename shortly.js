@@ -100,29 +100,34 @@ function(req, res) {
   });
 });
 
-
+//
 app.post('/login',
 function(req, res) {
-  var found = false;
   console.log('Users: ', User.models);
-  Users.models.forEach(function(item) {
-    if (req.body.username === item.get('username')) { found = true; }
-  });
 
-  if (found) {
-    res.setHeader('Location', '/');
-    res.sendStatus(200);
-    sess = req.session;
-    sess.username = req.body.username;
-    sess.password = req.body.password;
-  } else {
-    console.log(req.body.username);
-    console.log(req.body.password);
-    res.setHeader('Location', '/login');
-    res.sendStatus(200);
-    res.end();
-  }
+  var username = req.body.username;
+  db.knex('users')
+    .where('username', '=', username)
+    .then(function(response){
+      if(response.length === 0){
+        //user not found, reroute accordingly
+      } else {
+        res.setHeader('Location', '/');
+        res.sendStatus(200);
+        sess = req.session;
+        sess.username = req.body.username;
+        sess.password = req.body.password; 
+        console.log(sess.username + ' Logged In');
+      }
+    })
+    .catch(function(error) {
+      // uncomment when writing authentication tests
 
+      // throw {
+      //   type: 'DatabaseError',
+      //   message: 'Failed to create test setup data'
+      // };
+    });
 });
 
 /************************************************************/

@@ -74,14 +74,40 @@ function(req, res) {
 
 app.post('/signup',
 function(req, res) {
-  new User({
+  
+
+  var usr = new User({
     username: req.body.username,
     password: req.body.password
-  }).save().then(function() {
+  });
+
+  Users.add(usr);
+
+  usr.save().then(function() {
     res.setHeader('Location', '/');
     res.sendStatus(200);
   });
 });
+
+
+app.post('/login',
+function(req, res) {
+
+  var found = false;
+  Users.models.forEach(function(item) {
+    if (req.body.username === item.get('username')) { found = true; }
+  });
+
+  if (found) {
+    res.setHeader('Location', '/');
+    res.sendStatus(200);
+  } else {
+    res.setHeader('Location', '/login');
+    res.sendStatus(200);
+  }
+
+});
+
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/

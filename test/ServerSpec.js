@@ -17,47 +17,47 @@ var xbeforeEach = function() {};
 /************************************************************/
 
 
-describe('first test', function() {
+describe('initialize beforeEach for auth tests', function() {
 
-  beforeEach(function() {
-    // log out currently signed in user
-    request('http://127.0.0.1:4568/logout', function(error, res, body) {});
+  // beforeEach(function() {
+  //   // log out currently signed in user
+  //   request('http://127.0.0.1:4568/logout', function(error, res, body) {});
 
-    // delete link for roflzoo from db so it can be created later for the test
-    db.knex('urls')
-      .where('url', '=', 'http://roflzoo.com/')
-      .del()
-      .catch(function(error) {
-        throw {
-          type: 'DatabaseError',
-          message: 'Failed to create test setup data'
-        };
-      });
+  //   // delete link for roflzoo from db so it can be created later for the test
+  //   db.knex('urls')
+  //     .where('url', '=', 'http://roflzoo.com/')
+  //     .del()
+  //     .catch(function(error) {
+  //       throw {
+  //         type: 'DatabaseError',
+  //         message: 'Failed to create test setup data'
+  //       };
+  //     });
 
-    // delete user Svnh from db so it can be created later for the test
-    db.knex('users')
-      .where('username', '=', 'Svnh')
-      .del()
-      .catch(function(error) {
-        // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
-      });
+  //   // delete user Svnh from db so it can be created later for the test
+  //   db.knex('users')
+  //     .where('username', '=', 'Svnh')
+  //     .del()
+  //     .catch(function(error) {
+  //       // uncomment when writing authentication tests
+  //       throw {
+  //         type: 'DatabaseError',
+  //         message: 'Failed to create test setup data'
+  //       };
+  //     });
 
-    // delete user Phillip from db so it can be created later for the test
-    db.knex('users')
-      .where('username', '=', 'Phillip')
-      .del()
-      .catch(function(error) {
-        // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
-      });
-  });
+  //   // delete user Phillip from db so it can be created later for the test
+  //   db.knex('users')
+  //     .where('username', '=', 'Phillip')
+  //     .del()
+  //     .catch(function(error) {
+  //       // uncomment when writing authentication tests
+  //       throw {
+  //         type: 'DatabaseError',
+  //         message: 'Failed to create test setup data'
+  //       };
+  //     });
+  // });
 
   describe('Link creation:', function() {
 
@@ -80,9 +80,12 @@ describe('first test', function() {
         };
         // login via form and save session info
         requestWithSession(options, function(error, res, body) {
+          if(error) {
+            console.log('Link Creation Request Error: ', error);
+          }
           done();
         });
-      }).catch();
+      });
     });
 
     it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
@@ -96,6 +99,9 @@ describe('first test', function() {
 
       requestWithSession(options, function(error, res, body) {
         // res comes from the request module, and may not follow express conventions
+        if(error){
+          console.log('error logging in', error);
+        }
         expect(res.statusCode).to.equal(404);
         done();
       });
@@ -213,7 +219,7 @@ describe('first test', function() {
 
   }); // 'Link creation'
 
-    beforeEach('Privileged Access:', function() {
+  beforeEach('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {

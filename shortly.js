@@ -3,6 +3,7 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
 
 
 var db = require('./app/config');
@@ -40,9 +41,9 @@ app.get('/links',
 function(req, res) {
   sess = req.session;
   if (sess.username) {
-    console.log('got yo sess bitch');
+    console.log('/links sess.username exists');
   } else {
-    console.log('no sees');
+    console.log('/links sess.username does not exist');
   }
 
   Links.reset().fetch().then(function(links) {
@@ -103,21 +104,29 @@ function(req, res) {
 //
 app.post('/login',
 function(req, res) {
-  console.log('Users: ', User.models);
 
   var username = req.body.username;
   db.knex('users')
     .where('username', '=', username)
-    .then(function(response){
-      if(response.length === 0){
+    .then(function(response) {
+      if (response.length === 0) {
         //user not found, reroute accordingly
       } else {
-        res.setHeader('Location', '/');
-        res.sendStatus(200);
-        sess = req.session;
-        sess.username = req.body.username;
-        sess.password = req.body.password; 
-        console.log(sess.username + ' Logged In');
+
+        var hash = bcrypt.hashSync(req.body.password, response[0].salt);
+        
+        bcrypt.compare(req.body.password, hash, function(err, isMatch) {
+          if (isMatch) {
+            sess = req.session;
+            sess.username = req.body.username;
+            sess.password = req.body.password; 
+            // $('.login').text('Logout');
+            res.redirect('/');
+            // res.setHeader('Location', '/');
+            // res.sendStatus(200);
+            console.log(sess.username + ' Logged In');
+          }
+        });
       }
     })
     .catch(function(error) {
@@ -145,7 +154,7 @@ function(req, res) {
 app.get('/*', function(req, res) {
   new Link({ code: req.params[0] }).fetch().then(function(link) {
     if (!link) {
-      res.redirect('/');
+      res.end();
     } else {
       var click = new Click({
         linkId: link.get('id')

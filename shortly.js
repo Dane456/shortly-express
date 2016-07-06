@@ -27,32 +27,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
+app.get('/', util.checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
-function(req, res) {
-  res.render('index');
-});
+// app.get('/create', util.checkUser,
+// function(req, res) {
+//   res.render('index');
+// });
 
-app.get('/links', 
+app.get('/links', util.checkUser,
 function(req, res) {
   sess = req.session;
-  if (sess.username) {
-    console.log('/links sess.username exists');
-  } else {
-    console.log('/links sess.username does not exist');
-  }
-
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
   });
 });
 
+app.get('/login',
+function(req, res) {
+  res.render('login');
+});
 
-app.post('/links', 
+app.post('/links', util.checkUser,  
 function(req, res) {
   var uri = req.body.url;
 
@@ -104,7 +102,6 @@ function(req, res) {
 //
 app.post('/login',
 function(req, res) {
-
   var username = req.body.username;
   db.knex('users')
     .where('username', '=', username)
@@ -117,14 +114,11 @@ function(req, res) {
         
         bcrypt.compare(req.body.password, hash, function(err, isMatch) {
           if (isMatch) {
-            sess = req.session;
-            sess.username = req.body.username;
-            sess.password = req.body.password; 
-            // $('.login').text('Logout');
-            res.redirect('/');
-            // res.setHeader('Location', '/');
-            // res.sendStatus(200);
-            console.log(sess.username + ' Logged In');
+            req.session.regenerate(function() {
+              console.log('Session regenerated with :', req.session);
+              res.redirect('/');
+            });
+            console.log('User password and login accepted');
           }
         });
       }

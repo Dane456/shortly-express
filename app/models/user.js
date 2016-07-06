@@ -19,11 +19,10 @@ var User = db.Model.extend({
       var salt = bcrypt.genSaltSync(10);
       var hash = bcrypt.hashSync(model.get('password'), salt);
       model.set('password', hash);
-      console.log('Salt: ', salt);
       model.set('salt', salt);
     });
   }
-
+  
 
 
 });
